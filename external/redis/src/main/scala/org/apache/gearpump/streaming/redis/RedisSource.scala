@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gearpump.streaming.redis
+package org.apache.gearpump.streaming.redis
 
 import java.util.Arrays
 

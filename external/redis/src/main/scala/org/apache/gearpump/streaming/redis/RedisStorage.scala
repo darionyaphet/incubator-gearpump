@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gearpump.streaming.redis
+package org.apache.gearpump.streaming.redis
 
 import io.gearpump.Message
 import io.gearpump.google.common.base.Strings
-import io.gearpump.streaming.redis.RedisMessage.{GEOAdd, HSetMessage, LPushMessage, PFAdd, RPushMessage, SAddMessage, SetMessage, ZAddMessage}
+import RedisMessage.{GEOAdd, HSetMessage, LPushMessage, PFAdd, RPushMessage, SAddMessage, SetMessage, ZAddMessage}
 import io.gearpump.streaming.sink.DataSink
 import io.gearpump.streaming.task.TaskContext
 import io.gearpump.util.LogUtil

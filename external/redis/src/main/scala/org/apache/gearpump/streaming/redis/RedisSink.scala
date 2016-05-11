@@ -15,13 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gearpump.streaming.redis
+package org.apache.gearpump.streaming.redis
 
 import io.gearpump.Message
 import io.gearpump.google.common.base.Strings
-import io.gearpump.streaming.redis.RedisMessage.PublishMessage
+import RedisMessage.PublishMessage
 import io.gearpump.streaming.sink.DataSink
 import io.gearpump.util.LogUtil
+import org.apache.gearpump.streaming.redis.RedisMessage.PublishMessage
 import redis.clients.jedis.{Jedis, Protocol}
 
 class RedisSink(host: String = Protocol.DEFAULT_HOST,
