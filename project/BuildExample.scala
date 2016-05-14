@@ -235,9 +235,14 @@ object BuildExample extends sbt.Build {
     base = file("examples/streaming/redis"),
     settings = commonSettings ++ noPublish ++ myAssemblySettings ++
       Seq(
-        mainClass in (Compile, packageBin) := Some("io.gearpump.streaming.examples.redis.RedisTransfor"),
+        mainClass in (Compile, packageBin) := Some("org.apache.gearpump.streaming.example.redis.RedisSourceSinkExample"),
+        target in assembly := baseDirectory.value.getParentFile.getParentFile / "target" /
+          CrossVersion.binaryScalaVersion(scalaVersion.value)
+      ) ++
+      Seq(
+        mainClass in (Compile, packageBin) := Some("org.apache.gearpump.streaming.example.redis.RedisSourceStorageExample"),
         target in assembly := baseDirectory.value.getParentFile.getParentFile / "target" /
           CrossVersion.binaryScalaVersion(scalaVersion.value)
       )
-  ) dependsOn(streaming % "test->test; provided", external_redis)
+  ) dependsOn(streaming % "test->test; provided", redis)
 }
