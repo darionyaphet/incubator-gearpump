@@ -21,7 +21,6 @@ import org.apache.gearpump.Message
 import org.apache.gearpump.cluster.UserConfig
 import org.apache.gearpump.cluster.embedded.EmbeddedCluster
 import org.apache.gearpump.cluster.main.ArgumentsParser
-import org.apache.gearpump.streaming.redis.RedisMessage.SetMessage
 import org.apache.gearpump.streaming.redis.{RedisSource, RedisStorage}
 import org.apache.gearpump.streaming.sink.DataSinkProcessor
 import org.apache.gearpump.streaming.source.DataSourceProcessor
@@ -36,12 +35,12 @@ class UpperProcessor(taskContext: TaskContext, conf: UserConfig)
   import taskContext.output
 
   override def onNext(message: Message): Unit = {
-    val msg = message.msg.asInstanceOf[Option[String]]
-
-    if (!msg.isEmpty) {
-      val upper = msg.get.toUpperCase
-      LOG.info("to Upper : " + upper)
-      output(new Message(new SetMessage(msg.get, upper), message.timestamp))
+    Option(message.msg) match {
+      case Some(msg) =>
+        val upper = msg.asInstanceOf[String].toUpperCase
+        LOG.info(s"to Upper $upper")
+        output(new Message(upper, message.timestamp))
+      case None => LOG.warn("Empty String")
     }
   }
 }
