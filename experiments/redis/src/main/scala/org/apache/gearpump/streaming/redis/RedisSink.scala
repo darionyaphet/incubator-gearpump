@@ -24,8 +24,17 @@ import org.apache.gearpump.streaming.sink.DataSink
 import org.apache.gearpump.streaming.task.TaskContext
 import org.apache.gearpump.util.LogUtil
 import redis.clients.jedis.Jedis
-import redis.clients.jedis.Protocol.{DEFAULT_HOST,DEFAULT_PORT,DEFAULT_TIMEOUT}
+import redis.clients.jedis.Protocol.{DEFAULT_HOST, DEFAULT_PORT, DEFAULT_TIMEOUT}
 
+/**
+  * Publish messages to a Redis Pub/Sub Channel
+  *
+  * @param host
+  * @param port
+  * @param timeout
+  * @param password
+  * @param channel
+  */
 class RedisSink(host: String = DEFAULT_HOST,
                 port: Int = DEFAULT_PORT,
                 timeout: Int = DEFAULT_TIMEOUT,

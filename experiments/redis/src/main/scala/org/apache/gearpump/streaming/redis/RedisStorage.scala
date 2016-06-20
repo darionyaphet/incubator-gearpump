@@ -26,6 +26,15 @@ import org.apache.gearpump.util.LogUtil
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.Protocol.{DEFAULT_DATABASE, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_TIMEOUT}
 
+/**
+  * Save message in Redis Instance
+  *
+  * @param host
+  * @param port
+  * @param timeout
+  * @param database
+  * @param password
+  */
 class RedisStorage(
                     host: String = DEFAULT_HOST,
                     port: Int = DEFAULT_PORT,
@@ -52,10 +61,10 @@ class RedisStorage(
       case lpush: LPushMessage => client.lpush(lpush.key, lpush.value)
       case rpush: RPushMessage => client.rpush(rpush.key, rpush.value)
       case hset: HSetMessage => client.hset(hset.key, hset.field, hset.value)
-      case sadd: SAddMessage => client.sadd(sadd.key, sadd.member)
-      case zadd: ZAddMessage => client.zadd(zadd.key, zadd.score, zadd.member)
-      case pfAdd: PFAdd => client.pfadd(pfAdd.key, pfAdd.member)
-      case geoAdd: GEOAdd => client.geoadd(geoAdd.key, geoAdd.longitude, geoAdd.latitude, geoAdd.member)
+      case sadd: SAddMessage => client.sadd(sadd.key, sadd.value)
+      case zadd: ZAddMessage => client.zadd(zadd.key, zadd.score, zadd.value)
+      case pfAdd: PFAdd => client.pfadd(pfAdd.key, pfAdd.value)
+      case geoAdd: GEOAdd => client.geoadd(geoAdd.key, geoAdd.longitude, geoAdd.latitude, geoAdd.value)
     }
   }
 

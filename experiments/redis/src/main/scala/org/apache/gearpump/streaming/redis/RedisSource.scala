@@ -28,6 +28,16 @@ import redis.clients.jedis.Protocol.Keyword.{MESSAGE, PMESSAGE, SUBSCRIBE}
 import redis.clients.jedis.Protocol.{DEFAULT_HOST, DEFAULT_PORT, DEFAULT_TIMEOUT}
 import redis.clients.util.SafeEncoder
 
+/**
+  * Reading messages from Redis Pub/Sub Channel
+  * When patterned is set to true , RedisSource will fetch message from a series channels match the channel patters
+  *
+  * @param host
+  * @param port
+  * @param timeout
+  * @param patterned
+  * @param channels
+  */
 class RedisSource(
                    host: String = DEFAULT_HOST,
                    port: Int = DEFAULT_PORT,
