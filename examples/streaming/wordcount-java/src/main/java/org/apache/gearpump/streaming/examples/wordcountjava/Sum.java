@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Sum extends Task {
 
@@ -50,5 +51,12 @@ public class Sum extends Task {
     }
     Integer newCount = current + 1;
     wordCount.put(word, newCount);
+  }
+
+  @Override
+  public void onStop() {
+    for (Map.Entry<String, Integer> entry : wordCount.entrySet()) {
+      LOG.info(entry.getKey() + " : " + entry.getValue());
+    }
   }
 }

@@ -54,6 +54,9 @@ class Sum(taskContext: TaskContext, conf: UserConfig) extends Task(taskContext, 
     if (scheduler != null) {
       scheduler.cancel()
     }
+    for ((word, frequency) <- map) {
+      LOG.info(word + " : " + frequency)
+    }
   }
 
   def reportWordCount(): Unit = {
