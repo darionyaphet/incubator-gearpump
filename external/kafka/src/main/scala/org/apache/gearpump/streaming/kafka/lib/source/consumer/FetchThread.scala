@@ -23,7 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 import kafka.common.TopicAndPartition
 import org.apache.gearpump.streaming.kafka.lib.util.KafkaClient
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
+import org.apache.gearpump.streaming.kafka.util.KafkaSourceConfig
 import org.slf4j.Logger
 
 import org.apache.gearpump.util.LogUtil
@@ -34,10 +34,10 @@ object FetchThread {
   val factory = new FetchThreadFactory
 
   class FetchThreadFactory extends java.io.Serializable {
-    def getFetchThread(config: KafkaConfig, client: KafkaClient): FetchThread = {
-      val fetchThreshold = config.getInt(KafkaConfig.FETCH_THRESHOLD_CONFIG)
-      val fetchSleepMS = config.getLong(KafkaConfig.FETCH_SLEEP_MS_CONFIG)
-      val startOffsetTime = config.getLong(KafkaConfig.CONSUMER_START_OFFSET_CONFIG)
+    def getFetchThread(config: KafkaSourceConfig, client: KafkaClient): FetchThread = {
+      val fetchThreshold = config.getInt(KafkaSourceConfig.FETCH_THRESHOLD_CONFIG)
+      val fetchSleepMS = config.getLong(KafkaSourceConfig.FETCH_SLEEP_MS_CONFIG)
+      val startOffsetTime = config.getLong(KafkaSourceConfig.CONSUMER_START_OFFSET_CONFIG)
       FetchThread(fetchThreshold, fetchSleepMS, startOffsetTime, client)
     }
   }

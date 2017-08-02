@@ -21,7 +21,7 @@ import kafka.common.TopicAndPartition;
 import org.apache.gearpump.streaming.kafka.lib.source.AbstractKafkaSource;
 import org.apache.gearpump.streaming.kafka.lib.util.KafkaClient;
 import org.apache.gearpump.streaming.kafka.lib.source.consumer.FetchThread;
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig;
+import org.apache.gearpump.streaming.kafka.util.KafkaSourceConfig;
 import org.apache.gearpump.streaming.transaction.api.CheckpointStore;
 import org.apache.gearpump.streaming.transaction.api.TimeReplayableSource;
 
@@ -39,7 +39,7 @@ public class KafkaSource extends AbstractKafkaSource implements TimeReplayableSo
 
   // constructor for tests
   KafkaSource(String topic, Properties properties,
-      KafkaConfig.KafkaConfigFactory configFactory,
+      KafkaSourceConfig.KafkaSourceConfigFactory configFactory,
       KafkaClient.KafkaClientFactory clientFactory,
       FetchThread.FetchThreadFactory threadFactory) {
     super(topic, properties, configFactory, clientFactory, threadFactory);

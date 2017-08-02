@@ -18,7 +18,7 @@
 package org.apache.gearpump.streaming.kafka;
 
 import org.apache.gearpump.streaming.kafka.lib.store.AbstractKafkaStoreFactory;
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig;
+import org.apache.gearpump.streaming.kafka.util.KafkaStoreConfig;
 import org.apache.gearpump.streaming.transaction.api.CheckpointStoreFactory;
 
 import java.util.Properties;
@@ -34,7 +34,7 @@ public class KafkaStoreFactory extends AbstractKafkaStoreFactory implements Chec
   }
 
   /** constructor for tests */
-  KafkaStoreFactory(Properties props, KafkaConfig.KafkaConfigFactory factory) {
+  KafkaStoreFactory(Properties props, KafkaStoreConfig.KafkaStoreConfigFactory factory) {
     super(props, factory);
   }
 }

@@ -18,7 +18,7 @@
 package org.apache.gearpump.streaming.kafka;
 
 import org.apache.gearpump.streaming.kafka.lib.sink.AbstractKafkaSink;
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig;
+import org.apache.gearpump.streaming.kafka.util.KafkaSinkConfig;
 import org.apache.gearpump.streaming.sink.DataSink;
 
 import java.util.Properties;
@@ -34,8 +34,8 @@ public class KafkaSink extends AbstractKafkaSink implements DataSink {
   }
 
   KafkaSink(String topic, Properties props,
-      KafkaConfig.KafkaConfigFactory kafkaConfigFactory,
+      KafkaSinkConfig.KafkaSinkConfigFactory kafkaSinkConfigFactory,
       KafkaProducerFactory factory) {
-    super(topic, props, kafkaConfigFactory, factory);
+    super(topic, props, kafkaSinkConfigFactory, factory);
   }
 }

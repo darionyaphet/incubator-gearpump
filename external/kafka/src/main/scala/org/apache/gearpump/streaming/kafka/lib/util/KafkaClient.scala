@@ -18,6 +18,8 @@
 
 package org.apache.gearpump.streaming.kafka.lib.util
 
+import java.util.Properties
+
 import kafka.admin.AdminUtils
 import kafka.cluster.Broker
 import kafka.common.TopicAndPartition
@@ -25,7 +27,7 @@ import kafka.consumer.SimpleConsumer
 import kafka.utils.{ZKStringSerializer, ZkUtils}
 import org.I0Itec.zkclient.ZkClient
 import org.apache.gearpump.streaming.kafka.lib.source.consumer.KafkaConsumer
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
+import org.apache.gearpump.streaming.kafka.util.{KafkaSinkConfig, KafkaSourceConfig}
 import org.apache.gearpump.util.LogUtil
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.Serializer
@@ -36,19 +38,22 @@ object KafkaClient {
   val factory = new KafkaClientFactory
 
   class KafkaClientFactory extends java.io.Serializable {
-    def getKafkaClient(config: KafkaConfig): KafkaClient = {
-      val consumerConfig = config.getConsumerConfig
-      val zkClient = new ZkClient(consumerConfig.zkConnect, consumerConfig.zkSessionTimeoutMs,
+    def getKafkaClient(config: KafkaSourceConfig): KafkaClient = {
+      val zkClient = new ZkClient(config.zkConnect, consumerConfig.zkSessionTimeoutMs,
         consumerConfig.zkConnectionTimeoutMs, ZKStringSerializer)
       new KafkaClient(config, zkClient)
     }
   }
 }
 
-class KafkaClient(config: KafkaConfig, zkClient: ZkClient) {
+class KafkaProducerClient(config: KafkaSinkConfig) {
+
+}
+
+class KafkaClient(config: KafkaSourceConfig, zkClient: ZkClient) {
   import org.apache.gearpump.streaming.kafka.lib.util.KafkaClient._
 
-  private val consumerConfig = config.getConsumerConfig
+  private val consumerConfig = config.toConsumerConfig
 
   def getTopicAndPartitions(consumerTopics: List[String]): Array[TopicAndPartition] = {
     try {
@@ -86,9 +91,9 @@ class KafkaClient(config: KafkaConfig, zkClient: ZkClient) {
     KafkaConsumer(topic, partition, startOffsetTime, fetchSize, consumer)
   }
 
-  def createProducer[K, V](keySerializer: Serializer[K],
+  def createProducer[K, V](config: KafkaSinkConfig, keySerializer: Serializer[K],
       valueSerializer: Serializer[V]): KafkaProducer[K, V] = {
-    new KafkaProducer[K, V](config.getProducerConfig, keySerializer, valueSerializer)
+    new KafkaProducer[K, V](config.toProducerConfig, keySerializer, valueSerializer)
   }
 
   /**

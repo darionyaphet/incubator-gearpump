@@ -24,8 +24,8 @@ import com.twitter.bijection.Injection
 import kafka.api.OffsetRequest
 import org.apache.gearpump.TimeStamp
 import org.apache.gearpump.streaming.kafka.lib.source.consumer.KafkaConsumer
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig.KafkaConfigFactory
+import org.apache.gearpump.streaming.kafka.util.KafkaStoreConfig
+import org.apache.gearpump.streaming.kafka.util.KafkaStoreConfig.KafkaStoreConfigFactory
 import org.apache.gearpump.streaming.transaction.api.{CheckpointStore, CheckpointStoreFactory}
 import org.apache.gearpump.util.LogUtil
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
@@ -39,19 +39,19 @@ import org.apache.kafka.common.serialization.ByteArraySerializer
 
 abstract class AbstractKafkaStoreFactory(
     props: Properties,
-    configFactory: KafkaConfigFactory)
+    configFactory: KafkaStoreConfigFactory)
   extends CheckpointStoreFactory {
 
   def this(props: Properties) {
-    this(props, new KafkaConfigFactory)
+    this(props, new KafkaStoreConfigFactory)
   }
 
-  private lazy val config: KafkaConfig = configFactory.getKafkaConfig(props)
+  private lazy val config: KafkaStoreConfig = configFactory.getKafkaStoreConfig(props)
 
   override def getCheckpointStore(name: String): CheckpointStore = {
     val topic = config.getKafkaStoreTopic(name)
     val client = config.getKafkaClientFactory.getKafkaClient(config)
-    val replicas = config.getInt(KafkaConfig.REPLICATION_FACTOR_CONFIG)
+    val replicas = config.getInt(KafkaStoreConfig.REPLICATION_FACTOR_CONFIG)
     val topicExists = client.createTopic(topic, 1, replicas)
     val consumer = if (topicExists) {
       Some(client.createConsumer(topic, 0, OffsetRequest.EarliestTime))

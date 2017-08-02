@@ -24,14 +24,14 @@ import java.util.Properties
 import com.twitter.bijection.Injection
 import kafka.common.TopicAndPartition
 import org.apache.gearpump.streaming.MockUtil
-import org.apache.gearpump.streaming.kafka.lib.{MessageAndWatermark, KafkaMessageDecoder}
+import org.apache.gearpump.streaming.kafka.lib.{KafkaMessageDecoder, MessageAndWatermark}
 import org.apache.gearpump.streaming.kafka.lib.source.consumer.FetchThread.FetchThreadFactory
 import org.apache.gearpump.streaming.kafka.lib.source.grouper.PartitionGrouper
 import org.apache.gearpump.streaming.kafka.lib.util.KafkaClient.KafkaClientFactory
-import org.apache.gearpump.streaming.kafka.lib.source.consumer.{KafkaMessage, FetchThread}
+import org.apache.gearpump.streaming.kafka.lib.source.consumer.{FetchThread, KafkaMessage}
 import org.apache.gearpump.streaming.kafka.lib.util.KafkaClient
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig.KafkaConfigFactory
+import org.apache.gearpump.streaming.kafka.util.{KafkaSourceConfig, KafkaStoreConfig}
+import org.apache.gearpump.streaming.kafka.util.KafkaSourceConfig.KafkaSourceConfigFactory
 import org.apache.gearpump.streaming.transaction.api.{CheckpointStore, CheckpointStoreFactory}
 import org.apache.gearpump.Message
 import org.mockito.Matchers._
@@ -60,15 +60,15 @@ class KafkaSourceSpec extends PropSpec with PropertyChecks with Matchers with Mo
       val threadFactory = mock[FetchThreadFactory]
       val topics = tps.map(_.topic)
       val properties = mock[Properties]
-      val kafkaConfig = mock[KafkaConfig]
-      val configFactory = mock[KafkaConfigFactory]
+      val kafkaConfig = mock[KafkaSourceConfig]
+      val configFactory = mock[KafkaSourceConfigFactory]
       val partitionGrouper = mock[PartitionGrouper]
 
-      when(configFactory.getKafkaConfig(properties)).thenReturn(kafkaConfig)
+      when(configFactory.getKafkaSourceConfig(properties)).thenReturn(kafkaConfig)
       when(clientFactory.getKafkaClient(kafkaConfig)).thenReturn(kafkaClient)
       val tpsArray = tps.toArray
       when(kafkaClient.getTopicAndPartitions(topics)).thenReturn(tpsArray)
-      when(kafkaConfig.getConfiguredInstance(KafkaConfig.PARTITION_GROUPER_CLASS_CONFIG,
+      when(kafkaConfig.getConfiguredInstance(KafkaSourceConfig.PARTITION_GROUPER_CLASS_CONFIG,
         classOf[PartitionGrouper])).thenReturn(partitionGrouper)
       when(partitionGrouper.group(taskContext.parallelism, taskContext.taskId.index, tpsArray))
         .thenReturn(tpsArray)
@@ -91,20 +91,20 @@ class KafkaSourceSpec extends PropSpec with PropertyChecks with Matchers with Mo
         val checkpointStores = tps.map(_ -> mock[CheckpointStore]).toMap
         val topics = tps.map(_.topic)
         val properties = mock[Properties]
-        val kafkaConfig = mock[KafkaConfig]
-        val configFactory = mock[KafkaConfigFactory]
+        val kafkaConfig = mock[KafkaSourceConfig]
+        val configFactory = mock[KafkaSourceConfigFactory]
         val kafkaClient = mock[KafkaClient]
         val clientFactory = mock[KafkaClientFactory]
         val fetchThread = mock[FetchThread]
         val threadFactory = mock[FetchThreadFactory]
         val partitionGrouper = mock[PartitionGrouper]
 
-        when(configFactory.getKafkaConfig(properties)).thenReturn(kafkaConfig)
+        when(configFactory.getKafkaSourceConfig(properties)).thenReturn(kafkaConfig)
         when(clientFactory.getKafkaClient(kafkaConfig)).thenReturn(kafkaClient)
         when(threadFactory.getFetchThread(kafkaConfig, kafkaClient)).thenReturn(fetchThread)
         val tpsArray = tps.toArray
         when(kafkaClient.getTopicAndPartitions(topics)).thenReturn(tps.toArray)
-        when(kafkaConfig.getConfiguredInstance(KafkaConfig.PARTITION_GROUPER_CLASS_CONFIG,
+        when(kafkaConfig.getConfiguredInstance(KafkaSourceConfig.PARTITION_GROUPER_CLASS_CONFIG,
           classOf[PartitionGrouper])).thenReturn(partitionGrouper)
         when(partitionGrouper.group(taskContext.parallelism, taskContext.taskId.index, tpsArray))
           .thenReturn(tpsArray)
@@ -115,7 +115,7 @@ class KafkaSourceSpec extends PropSpec with PropertyChecks with Matchers with Mo
 
         checkpointStores.foreach { case (tp, store) =>
           when(checkpointStoreFactory.getCheckpointStore(
-            KafkaConfig.getCheckpointStoreNameSuffix(tp))).thenReturn(store)
+            KafkaStoreConfig.getCheckpointStoreNameSuffix(tp))).thenReturn(store)
           when(store.recover(startTime.toEpochMilli))
             .thenReturn(Some(Injection[Long, Array[Byte]](offset)))
         }
@@ -138,8 +138,8 @@ class KafkaSourceSpec extends PropSpec with PropertyChecks with Matchers with Mo
 
     forAll(msgQueueGen) { (msgQueue: List[KafkaMessage]) =>
       val properties = mock[Properties]
-      val config = mock[KafkaConfig]
-      val configFactory = mock[KafkaConfigFactory]
+      val config = mock[KafkaSourceConfig]
+      val configFactory = mock[KafkaSourceConfigFactory]
       val messageDecoder = mock[KafkaMessageDecoder]
       val kafkaClient = mock[KafkaClient]
       val clientFactory = mock[KafkaClientFactory]
@@ -151,11 +151,11 @@ class KafkaSourceSpec extends PropSpec with PropertyChecks with Matchers with Mo
       val topics = checkpointStores.map(_._1.topic).mkString(",")
 
       checkpointStores.foreach { case (tp, store) =>
-        when(checkpointStoreFactory.getCheckpointStore(KafkaConfig
+        when(checkpointStoreFactory.getCheckpointStore(KafkaSourceConfig
           .getCheckpointStoreNameSuffix(tp))).thenReturn(store)
       }
-      when(configFactory.getKafkaConfig(properties)).thenReturn(config)
-      when(config.getConfiguredInstance(KafkaConfig.MESSAGE_DECODER_CLASS_CONFIG,
+      when(configFactory.getKafkaSourceConfig(properties)).thenReturn(config)
+      when(config.getConfiguredInstance(KafkaSourceConfig.MESSAGE_DECODER_CLASS_CONFIG,
         classOf[KafkaMessageDecoder])).thenReturn(messageDecoder)
       when(clientFactory.getKafkaClient(config)).thenReturn(kafkaClient)
       when(threadFactory.getFetchThread(config, kafkaClient)).thenReturn(fetchThread)
@@ -186,13 +186,13 @@ class KafkaSourceSpec extends PropSpec with PropertyChecks with Matchers with Mo
       val tps = 0.until(num).map(id => TopicAndPartition("topic", id))
       val checkpointStores = tps.map(_ -> mock[CheckpointStore]).toMap
       val props = mock[Properties]
-      val kafkaConfig = mock[KafkaConfig]
-      val configFactory = mock[KafkaConfigFactory]
+      val kafkaConfig = mock[KafkaSourceConfig]
+      val configFactory = mock[KafkaSourceConfigFactory]
       val threadFactory = mock[FetchThreadFactory]
       val kafkaClient = mock[KafkaClient]
       val clientFactory = mock[KafkaClientFactory]
 
-      when(configFactory.getKafkaConfig(props)).thenReturn(kafkaConfig)
+      when(configFactory.getKafkaSourceConfig(props)).thenReturn(kafkaConfig)
       when(clientFactory.getKafkaClient(kafkaConfig)).thenReturn(kafkaClient)
 
       val source = new KafkaSource("topic", props, configFactory, clientFactory, threadFactory)

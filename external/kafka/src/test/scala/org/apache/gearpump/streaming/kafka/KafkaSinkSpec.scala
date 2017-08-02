@@ -22,17 +22,17 @@ import java.util.Properties
 
 import com.twitter.bijection.Injection
 import org.apache.gearpump.streaming.kafka.lib.sink.AbstractKafkaSink.KafkaProducerFactory
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig.KafkaConfigFactory
+import org.apache.gearpump.streaming.kafka.util.KafkaSinkConfig
+import org.apache.gearpump.streaming.kafka.util.KafkaSinkConfig.KafkaSinkConfigFactory
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.mockito.Mockito._
 import org.scalacheck.Gen
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{Matchers, PropSpec}
-
 import org.apache.gearpump.Message
 import org.apache.gearpump.streaming.MockUtil
+import org.apache.gearpump.streaming.kafka.util.KafkaSinkConfig.KafkaSinkConfigFactory
 
 class KafkaSinkSpec extends PropSpec with PropertyChecks with Matchers with MockitoSugar {
 
@@ -48,10 +48,10 @@ class KafkaSinkSpec extends PropSpec with PropertyChecks with Matchers with Mock
         val props = mock[Properties]
         val producer = mock[KafkaProducer[Array[Byte], Array[Byte]]]
         val producerFactory = mock[KafkaProducerFactory]
-        val configFactory = mock[KafkaConfigFactory]
-        val config = mock[KafkaConfig]
+        val configFactory = mock[KafkaSinkConfigFactory]
+        val config = mock[KafkaSinkConfig]
 
-        when(configFactory.getKafkaConfig(props)).thenReturn(config)
+        when(configFactory.getKafkaSinkConfig(props)).thenReturn(config)
         when(producerFactory.getKafkaProducer(config)).thenReturn(producer)
 
         val (topic, key, msg) = data
@@ -71,10 +71,10 @@ class KafkaSinkSpec extends PropSpec with PropertyChecks with Matchers with Mock
     val props = mock[Properties]
     val producer = mock[KafkaProducer[Array[Byte], Array[Byte]]]
     val producerFactory = mock[KafkaProducerFactory]
-    val configFactory = mock[KafkaConfigFactory]
-    val config = mock[KafkaConfig]
+    val configFactory = mock[KafkaSinkConfigFactory]
+    val config = mock[KafkaSinkConfig]
 
-    when(configFactory.getKafkaConfig(props)).thenReturn(config)
+    when(configFactory.getKafkaSinkConfig(props)).thenReturn(config)
     when(producerFactory.getKafkaProducer(config)).thenReturn(producer)
 
     val kafkaSink = new KafkaSink("topic", props, configFactory, producerFactory)

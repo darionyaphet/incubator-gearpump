@@ -22,9 +22,8 @@ import java.util.Properties
 
 import akka.actor.ActorSystem
 import kafka.api.OffsetRequest
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
+import org.apache.gearpump.streaming.kafka.util.{KafkaSinkConfig, KafkaSourceConfig, KafkaStoreConfig}
 import org.slf4j.Logger
-
 import org.apache.gearpump.cluster.UserConfig
 import org.apache.gearpump.cluster.client.ClientContext
 import org.apache.gearpump.cluster.main.{ArgumentsParser, CLIOption, ParseResult}
@@ -57,11 +56,11 @@ object KafkaWordCount extends AkkaApp with ArgumentsParser {
     val sinkNum = config.getInt("sink")
     val appConfig = UserConfig.empty
     val props = new Properties
-    props.put(KafkaConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
-    props.put(KafkaConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
-    props.put(KafkaConfig.CONSUMER_START_OFFSET_CONFIG,
+    props.put(KafkaSourceConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
+    props.put(KafkaSinkConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+    props.put(KafkaSourceConfig.CONSUMER_START_OFFSET_CONFIG,
       new java.lang.Long(OffsetRequest.LatestTime))
-    props.put(KafkaConfig.CHECKPOINT_STORE_NAME_PREFIX_CONFIG, appName)
+    props.put(KafkaStoreConfig.CHECKPOINT_STORE_NAME_PREFIX_CONFIG, appName)
     val sourceTopic = "topic1"
     val source = new KafkaSource(sourceTopic, props)
     val checkpointStoreFactory = new KafkaStoreFactory(props)

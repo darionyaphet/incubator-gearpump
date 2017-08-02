@@ -21,9 +21,8 @@ package org.apache.gearpump.streaming.examples.state
 import java.util.Properties
 
 import akka.actor.ActorSystem
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
+import org.apache.gearpump.streaming.kafka.util.{KafkaSinkConfig, KafkaSourceConfig, KafkaStoreConfig}
 import org.apache.hadoop.conf.Configuration
-
 import org.apache.gearpump.cluster.UserConfig
 import org.apache.gearpump.cluster.client.ClientContext
 import org.apache.gearpump.cluster.main.{ArgumentsParser, CLIOption, ParseResult}
@@ -31,7 +30,7 @@ import org.apache.gearpump.streaming.partitioner.HashPartitioner
 import org.apache.gearpump.streaming.examples.state.processor.CountProcessor
 import org.apache.gearpump.streaming.hadoop.HadoopCheckpointStoreFactory
 import org.apache.gearpump.streaming.hadoop.lib.rotation.FileSizeRotation
-import org.apache.gearpump.streaming.kafka.{KafkaStoreFactory, KafkaSink, KafkaSource}
+import org.apache.gearpump.streaming.kafka.{KafkaSink, KafkaSource, KafkaStoreFactory}
 import org.apache.gearpump.streaming.sink.DataSinkProcessor
 import org.apache.gearpump.streaming.source.DataSourceProcessor
 import org.apache.gearpump.streaming.state.impl.PersistentStateConfig
@@ -78,10 +77,10 @@ object MessageCountApp extends AkkaApp with ArgumentsParser {
       .withValue(PersistentStateConfig.STATE_CHECKPOINT_STORE_FACTORY, checkpointStoreFactory)
 
     val properties = new Properties
-    properties.put(KafkaConfig.ZOOKEEPER_CONNECT_CONFIG, config.getString(ZOOKEEPER_CONNECT))
+    properties.put(KafkaSourceConfig.ZOOKEEPER_CONNECT_CONFIG, config.getString(ZOOKEEPER_CONNECT))
     val brokerList = config.getString(BROKER_LIST)
-    properties.put(KafkaConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList)
-    properties.put(KafkaConfig.CHECKPOINT_STORE_NAME_PREFIX_CONFIG, appName)
+    properties.put(KafkaSinkConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList)
+    properties.put(KafkaStoreConfig.CHECKPOINT_STORE_NAME_PREFIX_CONFIG, appName)
     val kafkaStoreFactory = new KafkaStoreFactory(properties)
     val sourceTopic = config.getString(SOURCE_TOPIC)
     val kafkaSource = new KafkaSource(sourceTopic, properties)

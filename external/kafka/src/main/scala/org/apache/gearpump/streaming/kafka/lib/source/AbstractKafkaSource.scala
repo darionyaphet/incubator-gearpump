@@ -31,8 +31,8 @@ import KafkaClient.KafkaClientFactory
 import org.apache.gearpump.streaming.kafka.lib.source.consumer.{FetchThread, KafkaMessage}
 import org.apache.gearpump.streaming.kafka.lib.source.grouper.PartitionGrouper
 import org.apache.gearpump.streaming.kafka.lib.util.KafkaClient
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig.KafkaConfigFactory
+import org.apache.gearpump.streaming.kafka.util.{KafkaSourceConfig, KafkaStoreConfig}
+import org.apache.gearpump.streaming.kafka.util.KafkaSourceConfig.KafkaSourceConfigFactory
 import org.apache.gearpump.streaming.task.TaskContext
 import org.apache.gearpump.streaming.transaction.api._
 import org.apache.gearpump.util.LogUtil
@@ -52,21 +52,21 @@ object AbstractKafkaSource {
 abstract class AbstractKafkaSource(
     topic: String,
     props: Properties,
-    kafkaConfigFactory: KafkaConfigFactory,
+    kafkaConfigFactory: KafkaSourceConfigFactory,
     kafkaClientFactory: KafkaClientFactory,
     fetchThreadFactory: FetchThreadFactory)
   extends TimeReplayableSource {
   import org.apache.gearpump.streaming.kafka.lib.source.AbstractKafkaSource._
 
   def this(topic: String, properties: Properties) = {
-    this(topic, properties, new KafkaConfigFactory, KafkaClient.factory, FetchThread.factory)
+    this(topic, properties, new KafkaSourceConfigFactory, KafkaClient.factory, FetchThread.factory)
   }
 
-  private lazy val config: KafkaConfig = kafkaConfigFactory.getKafkaConfig(props)
+  private lazy val config: KafkaSourceConfig = kafkaConfigFactory.getKafkaSourceConfig(props)
   private lazy val kafkaClient: KafkaClient = kafkaClientFactory.getKafkaClient(config)
   private lazy val fetchThread: FetchThread = fetchThreadFactory.getFetchThread(config, kafkaClient)
   private lazy val messageDecoder = config.getConfiguredInstance(
-    KafkaConfig.MESSAGE_DECODER_CLASS_CONFIG, classOf[KafkaMessageDecoder])
+    KafkaSourceConfig.MESSAGE_DECODER_CLASS_CONFIG, classOf[KafkaMessageDecoder])
 
   private var watermark: Instant = Instant.EPOCH
   private var checkpointStoreFactory: Option[CheckpointStoreFactory] = None
@@ -83,7 +83,7 @@ abstract class AbstractKafkaSource(
     LOG.info("KafkaSource opened at start time {}", startTime)
     this.watermark = startTime
     val topicList = topic.split(",", -1).toList
-    val grouper = config.getConfiguredInstance(KafkaConfig.PARTITION_GROUPER_CLASS_CONFIG,
+    val grouper = config.getConfiguredInstance(KafkaSourceConfig.PARTITION_GROUPER_CLASS_CONFIG,
       classOf[PartitionGrouper])
     val topicAndPartitions = grouper.group(parallelism, taskId.index,
       kafkaClient.getTopicAndPartitions(topicList))
@@ -141,7 +141,7 @@ abstract class AbstractKafkaSource(
       f <- checkpointStoreFactory
       tp <- tps
     } {
-      val store = f.getCheckpointStore(KafkaConfig.getCheckpointStoreNameSuffix(tp))
+      val store = f.getCheckpointStore(KafkaStoreConfig.getCheckpointStoreNameSuffix(tp))
       LOG.info("created checkpoint store for {}", tp)
       checkpointStores += tp -> store
     }

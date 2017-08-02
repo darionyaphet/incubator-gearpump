@@ -22,8 +22,8 @@ import java.util.Properties
 
 import org.apache.gearpump.Message
 import org.apache.gearpump.streaming.kafka.lib.sink.AbstractKafkaSink.KafkaProducerFactory
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig
-import org.apache.gearpump.streaming.kafka.util.KafkaConfig.KafkaConfigFactory
+import org.apache.gearpump.streaming.kafka.util.KafkaSinkConfig
+import org.apache.gearpump.streaming.kafka.util.KafkaSinkConfig.KafkaSinkConfigFactory
 import org.apache.gearpump.streaming.sink.DataSink
 import org.apache.gearpump.streaming.task.TaskContext
 import org.apache.gearpump.util.LogUtil
@@ -34,14 +34,15 @@ object AbstractKafkaSink {
   private val LOG = LogUtil.getLogger(classOf[AbstractKafkaSink])
 
   val producerFactory = new KafkaProducerFactory {
-    override def getKafkaProducer(config: KafkaConfig): KafkaProducer[Array[Byte], Array[Byte]] = {
-      new KafkaProducer[Array[Byte], Array[Byte]](config.getProducerConfig,
+    override def getKafkaProducer(config: KafkaSinkConfig):
+    KafkaProducer[Array[Byte], Array[Byte]] = {
+      new KafkaProducer[Array[Byte], Array[Byte]](config.toProducerConfig,
         new ByteArraySerializer, new ByteArraySerializer)
     }
   }
 
   trait KafkaProducerFactory extends java.io.Serializable {
-    def getKafkaProducer(config: KafkaConfig): KafkaProducer[Array[Byte], Array[Byte]]
+    def getKafkaProducer(config: KafkaSinkConfig): KafkaProducer[Array[Byte], Array[Byte]]
   }
 }
 /**
@@ -51,15 +52,15 @@ object AbstractKafkaSink {
 abstract class AbstractKafkaSink private[kafka](
     topic: String,
     props: Properties,
-    kafkaConfigFactory: KafkaConfigFactory,
+    kafkaConfigFactory: KafkaSinkConfigFactory,
     factory: KafkaProducerFactory) extends DataSink {
   import org.apache.gearpump.streaming.kafka.lib.sink.AbstractKafkaSink._
 
   def this(topic: String, props: Properties) = {
-    this(topic, props, new KafkaConfigFactory, AbstractKafkaSink.producerFactory)
+    this(topic, props, new KafkaSinkConfigFactory, AbstractKafkaSink.producerFactory)
   }
 
-  private lazy val config = kafkaConfigFactory.getKafkaConfig(props)
+  private lazy val config = kafkaConfigFactory.getKafkaSinkConfig(props)
   // Lazily construct producer since KafkaProducer is not serializable
   private lazy val producer = factory.getKafkaProducer(config)
 
