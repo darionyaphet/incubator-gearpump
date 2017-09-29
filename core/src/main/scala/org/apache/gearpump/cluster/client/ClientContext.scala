@@ -80,6 +80,10 @@ class ClientContext(config: Config, sys: ActorSystem, _master: ActorRef) {
     submit(app, System.getProperty(GEARPUMP_APP_JAR))
   }
 
+  def submit(app: Application, executorNum: Int): RunningApplication = {
+    submit(app, System.getProperty(GEARPUMP_APP_JAR), executorNum)
+  }
+
   def submit(app: Application, jar: String): RunningApplication = {
     submit(app, jar, getExecutorNum)
   }
